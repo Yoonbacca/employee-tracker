@@ -41,17 +41,17 @@ const questions = [
 ];
 
 // Query database
-db.query('SELECT * FROM departments', function (err, results) {
-    console.log(results);
-});
+// db.query('SELECT * FROM departments', function (err, results) {
+//     console.log(results);
+// });
   
-db.query('SELECT * FROM roles', function (err, results) {
-    console.log(results);
-});
+// db.query('SELECT * FROM roles', function (err, results) {
+//     console.log(results);
+// });
   
-db.query('SELECT * FROM employees', function (err, results) {
-    console.log(results);
- });
+// db.query('SELECT * FROM employees', function (err, results) {
+//     console.log(results);
+//  });
   
 // Default response for any other request (Not Found)
 app.use((req, res) => {
@@ -62,11 +62,13 @@ app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`);
 });
 
-// function init() {
-//     console.log('Welcome to Employee Tracker! Please follow the prompts below');
-//     inquirer.prompt(questions).then((answers) => {
-//         console.log("Thank you!");
-//     })
-// }
+function init() {
+    console.log('Welcome to Employee Tracker! Please follow the prompts below');
+    inquirer.prompt(questions)
+            .then((answers) => {
+                let selection = Object.values(answers).toString();
+                console.log(typeof selection);
+            })
+}
 
-// init();
+init();

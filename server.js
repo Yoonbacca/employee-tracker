@@ -9,18 +9,25 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Connect to database
 const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    // MySQL username,
-    user: 'root',
-    // MySQL password
-    password: '$6NBsWTh@Ka$kG',
-    database: 'company_db'
-  },
-  console.log(`Connected to the company_db database.`)
-);
+    {
+      host: 'localhost',
+      // MySQL username,
+      user: 'root',
+      // MySQL password
+      password: '$6NBsWTh@Ka$kG',
+      database: 'company_db'
+    },
+    console.log(`Connected to the company_db database.`)
+  );
+
+// Query database
+
+  
+
+
+  
+// Default response for any other request (Not Found)
 
 const questions = [
     {
@@ -40,22 +47,8 @@ const questions = [
     },
 ];
 
-// Query database
-// db.query('SELECT * FROM departments', function (err, results) {
-//     console.log(results);
-// });
-  
-// db.query('SELECT * FROM roles', function (err, results) {
-//     console.log(results);
-// });
-  
-// db.query('SELECT * FROM employees', function (err, results) {
-//     console.log(results);
-//  });
-  
-// Default response for any other request (Not Found)
 app.use((req, res) => {
-res.status(404).end();
+    res.status(404).end();
 });
 
 app.listen(PORT, () => {
@@ -67,7 +60,26 @@ function init() {
     inquirer.prompt(questions)
             .then((answers) => {
                 let selection = Object.values(answers).toString();
-                console.log(typeof selection);
+                switch (selection) {
+                    case 'View All Departments':
+                        db.query('SELECT * FROM departments', function (err, results) {
+                            console.table(results);
+                        });
+                        break;
+                    case 'View All Roles':
+                        db.query('SELECT * FROM roles', function (err, results) {
+                            console.table(results);
+                        });
+                        break;
+                    case 'View All Employees':
+                        db.query('SELECT * FROM employees', function (err, results) {
+                            console.table(results);
+                         });
+                        break;
+                    default:
+                        console.log('Not built yet');
+                  }
+                  
             })
 }
 

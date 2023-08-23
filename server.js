@@ -23,7 +23,7 @@ const db = mysql.createConnection(
 );
 
 // Query database
-db.query('SELECT * FROM students', function (err, results) {
+db.query('SELECT * FROM departments', function (err, results) {
   console.log(results);
 });
 
@@ -53,14 +53,6 @@ const questions = [
         new inquirer.Separator()]
     },
 ];
-
-
-function writeToFile(data) { 
-
-    fs.writeFile('./assets/README.md', data, (err) =>
-    err ? console.error(err) : console.log('Success! Check the assets folder for your new file!')
-    );
-}
 
 function init() {
     console.log('Welcome to Employee Tracker! Please follow the prompts below');

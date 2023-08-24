@@ -61,7 +61,43 @@ const questions = [
         choices: function () {
             return pullDepts()
         }
-    }
+    },
+    {   
+        type: 'input',
+        name: 'empFirstName',
+        message: "What is the your new employee's first name?",
+        when: (answers) => answers.choice === 'Add Employee',
+    },
+    {   
+        type: 'input',
+        name: 'empFirstName',
+        message: "What is the your new employee's first name?",
+        when: (answers) => answers.choice === 'Add Employee',
+    },
+    {   
+        type: 'input',
+        name: 'empLastName',
+        message: "What is the your new employee's last name?",
+        when: (answers) => answers.empFirstName !== undefined,
+    },
+    {   
+        type: 'list',
+        name: 'empRole',
+        message: "What is the your new employee's role?",
+        when: (answers) => answers.empLastName !== undefined,
+        choices: function () {
+            return pullRoles()
+        }
+    },
+    {   
+        type: 'list',
+        name: 'empManager',
+        message: "Who is their manager?",
+        when: (answers) => answers.empLastName !== undefined,
+        choices: function () {
+            return pullManagers()
+        }
+    },
 ];
 
 app.use((req, res) => {
@@ -88,12 +124,44 @@ function pullDepts() {
     });           
 }
 
+function pullRoles() {
+    return new Promise((resolve,reject) => {
+        db.query('SELECT id, title FROM roles WHERE id != 1', function (err, results) {
+            if (err) {
+                reject(err);
+            } else {
+                const choices = results.map((role) => ({
+                    value: role.id,
+                    name: role.title,
+                }));
+                resolve(choices);
+            }
+        });
+    });           
+}
+
+function pullManagers() {
+    return new Promise((resolve,reject) => {
+        db.query('SELECT id, first_name, last_name FROM employees WHERE role_id <= 2', function (err, results) {
+            if (err) {
+                reject(err);
+            } else {
+                const choices = results.map((emp) => ({
+                    value: emp.id,
+                    name: emp.first_name + " " + emp.last_name,
+                }));
+                resolve(choices);
+            }
+        });
+    });           
+}
+
 function init() {
     console.log(`+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |E M P L O Y E E   T R A C K E R|
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-Welcome to your Employee Tracker! Please follow the prompts below:
+Welcome to Employee Tracker! Please follow the prompts below:
 ------------------------------------------------------------------`);
     inquirer.prompt(questions)
             .then((answers) => {
@@ -131,9 +199,21 @@ Welcome to your Employee Tracker! Please follow the prompts below:
                         let roleTitle = answers.roleTitle;
                         let roleSalary = answers.roleSalary;
                         let roleDept = answers.roleDept;
-                        console.log(roleTitle,roleSalary,roleDept);
                         sql = `INSERT INTO roles (title, salary, department_id)
                         VALUES ("${roleTitle}", ${roleSalary}, ${roleDept});`;
+                        db.query(sql, function (err, results) {
+                            console.log(`Added ${roleTitle} to the Roles Table!`);
+                        });
+                        break;
+                    case 'Add Employee':
+                        let empFirstName = answers.empFirstName;
+                        let empLastName = answers.empLastName;
+                        let empRole = answers.empRole;
+                        let empManager = answers.empManager;
+
+                        console.log(empFirstName,empLastName,empRole,empManager);
+                        sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
+                        VALUES ("${empFirstName}", "${empLastName}", ${empRole}, ${empManager});`;
                         db.query(sql, function (err, results) {
                             console.log(`Added ${roleTitle} to the Roles Table!`);
                         });

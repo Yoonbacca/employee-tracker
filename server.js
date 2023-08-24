@@ -25,14 +25,16 @@ const questions = [
     {   
         type: 'list',
         name: 'choice',
-        message: 'What would you like to do?',
+        message: `
+What would you like to do?`,
         choices: ['View all Departments', 
                 'View all Roles', 
                 'View all Employees',
                 'Add Department',
                 'Add Role', 
                 'Add Employee', 
-                'Update an Employee Role'],
+                'Update Employee Role',
+                new inquirer.Separator()],
         default: 'View all Departments',
     },
     {   
@@ -98,6 +100,24 @@ const questions = [
             return pullManagers()
         }
     },
+    {   
+        type: 'list',
+        name: 'updatedEmp',
+        message: "Who's role is changing?",
+        when: (answers) => answers.choice === 'Update Employee Role',
+        choices: function () {
+            return pullEmployees()
+        }
+    },
+    {   
+        type: 'list',
+        name: 'updatedRole',
+        message: "What is their new role?",
+        when: (answers) => answers.updatedEmp !== undefined,
+        choices: function () {
+            return pullRoles()
+        }
+    },
 ];
 
 app.use((req, res) => {
@@ -140,6 +160,23 @@ function pullRoles() {
     });           
 }
 
+function pullEmployees() {
+    return new Promise((resolve,reject) => {
+        db.query('SELECT id, first_name, last_name FROM employees', function (err, results) {
+            if (err) {
+                reject(err);
+            } else {
+                const choices = results.map((emp) => ({
+                    value: emp.id,
+                    name: emp.first_name + " " + emp.last_name,
+                }));
+                resolve(choices);
+            }
+        });
+    });           
+}
+
+
 function pullManagers() {
     return new Promise((resolve,reject) => {
         db.query('SELECT id, first_name, last_name FROM employees WHERE role_id <= 2', function (err, results) {
@@ -163,65 +200,115 @@ function init() {
 
 Welcome to Employee Tracker! Please follow the prompts below:
 ------------------------------------------------------------------`);
-    inquirer.prompt(questions)
-            .then((answers) => {
-                let choice = answers.choice;
-                let sql = "";
-                console.log(choice)
-                switch (choice) {
-                    case 'View all Departments':
-                        sql = 'SELECT * FROM departments';
-                        db.query(sql, function (err, results) {
-                            console.table(results);
-                        });
-                        break;
-                    case 'View all Roles':
-                        sql = 'SELECT * FROM roles';
-                        db.query(sql, function (err, results) {
-                            console.table(results);
-                        });
-                        break;
-                    case 'View all Employees':
-                        sql = 'SELECT * FROM employees'
-                        db.query(sql, function (err, results) {
-                            console.table(results);
-                        });
-                        break;
-                    case 'Add Department':
-                        let deptName = answers.deptName;
-                        sql = `INSERT INTO departments (name)
-                        VALUES ("${deptName}");`;
-                        db.query(sql, function (err, results) {
-                            console.log(`Added ${deptName} to the Departments Table!`);
-                        });
-                        break;
-                    case 'Add Role':
-                        let roleTitle = answers.roleTitle;
-                        let roleSalary = answers.roleSalary;
-                        let roleDept = answers.roleDept;
-                        sql = `INSERT INTO roles (title, salary, department_id)
-                        VALUES ("${roleTitle}", ${roleSalary}, ${roleDept});`;
-                        db.query(sql, function (err, results) {
-                            console.log(`Added ${roleTitle} to the Roles Table!`);
-                        });
-                        break;
-                    case 'Add Employee':
-                        let empFirstName = answers.empFirstName;
-                        let empLastName = answers.empLastName;
-                        let empRole = answers.empRole;
-                        let empManager = answers.empManager;
+    function promptQuestions() {
+        inquirer.prompt(questions)
+                .then((answers) => {
+                    let choice = answers.choice;
+                    let sql = "";
+                    console.log(choice)
+                    switch (choice) {
+                        case 'View all Departments':
+                            sql = 'SELECT * FROM departments';
 
-                        console.log(empFirstName,empLastName,empRole,empManager);
-                        sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
-                        VALUES ("${empFirstName}", "${empLastName}", ${empRole}, ${empManager});`;
-                        db.query(sql, function (err, results) {
-                            console.log(`Added ${roleTitle} to the Roles Table!`);
-                        });
-                        break;
-                    default:
-                        console.log('Not built yet');
-                  }
-            })
+                            db.query(sql, function (err, results) {
+                                console.log("\nDepartments:");
+                                console.log("ID  Name");
+                                console.log("--  ----");
+                                results.forEach((dept) => {
+                                    console.log(`${String(dept.id).padStart(2, '0')}  ${dept.name}`);
+                                });
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'View all Roles':
+                            sql = 'SELECT * FROM roles';
+
+                            db.query(sql, function (err, results) {
+                                console.log('\nRoles:');
+                                console.log("ID  Title                            Salary       Dept ID");
+                                console.log("--  -----                            ------       -------");
+                                results.forEach((role) => {
+                                    console.log(`${String(role.id).padStart(2, '0')}  ${String(role.title).padEnd(30, ' ')}   ${String(role.salary).padEnd(10, ' ')}   ${String(role.department_id).padStart(2, '0')}`);
+                                });
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'View all Employees':
+                            sql = 'SELECT * FROM employees'
+
+                            db.query(sql, function (err, results) {
+                                console.log('\nEmployees:');
+                                console.log("ID  First Name                     Last Name                      Role ID  Manager ID");
+                                console.log("--  ----------                     ---------                      -------  ----------");
+                                results.forEach((emp) => {
+                                    console.log(`${String(emp.id).padStart(2, '0')}  ${String(emp.first_name).padEnd(30, ' ')} ${String(emp.last_name).padEnd(30, ' ')} ${String(emp.role_id).padStart(2, '0')}       ${String(emp.manager_id).padStart(2, '0')}`);
+                                });
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'Add Department':
+                            let deptName = answers.deptName;
+                            sql = `INSERT INTO departments (name)
+
+                            VALUES ("${deptName}");`;
+
+                            db.query(sql, function (err, results) {
+                                console.log(`Added ${deptName} to the Departments Table!`);
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'Add Role':
+                            let roleTitle = answers.roleTitle;
+                            let roleSalary = answers.roleSalary;
+                            let roleDept = answers.roleDept;
+
+                            sql = `INSERT INTO roles (title, salary, department_id)
+                            VALUES ("${roleTitle}", ${roleSalary}, ${roleDept});`;
+
+                            db.query(sql, function (err, results) {
+                                console.log(`Added ${roleTitle} to the Roles Table!`);
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'Add Employee':
+                            let empFirstName = answers.empFirstName;
+                            let empLastName = answers.empLastName;
+                            let empRole = answers.empRole;
+                            let empManager = answers.empManager;
+
+                            sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
+                            VALUES ("${empFirstName}", "${empLastName}", ${empRole}, ${empManager});`;
+
+                            db.query(sql, function (err, results) {
+                                console.log(`Added ${empFirstName} ${empLastName}} to the Employee Table!`);
+                            });
+                            promptQuestions();
+
+                            break;
+                        case 'Update Employee Role':
+                            let updatedEmp = answers.updatedEmp;
+                            let updatedRole = answers.updatedRole;
+
+                            console.log(updatedEmp,updatedRole);
+                            sql = `UPDATE employees SET role_id = ${updatedRole} WHERE id = ${updatedEmp}`;
+
+                            db.query(sql, function (err, results) {
+                                console.log(`Updated Employee's Role!`);
+                            });
+                            promptQuestions();
+
+                            break;
+                        default:
+                            console.log('Thank you!');
+                    }
+                })
+    }
+    promptQuestions();
 }
 
 init();

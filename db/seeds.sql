@@ -18,16 +18,16 @@ VALUES (1, "CEO", 100000000, 1),
 
 INSERT INTO employees (id, first_name, last_name, role_id, manager_id)
 VALUES (01, "Edward", "Elite", 1, 01),
-       (02, "Molly", "Manager", 2, 01),
-       (03, "Matt", "Manager", 2, 01),
-       (04, "Morgan", "Manager", 2, 01),
-       (05, "Marge", "Manager", 2, 01),
-       (06, "Mandy", "Manager", 2, 01),
-       (07, "Max", "Manager", 2, 01),
+       (02, "Molly", "Manages", 2, 01),
+       (03, "Lily", "Leads", 2, 01),
+       (04, "Carl", "Commands", 2, 01),
+       (05, "Sally", "Supervises", 2, 01),
+       (06, "Dilbert", "Directs", 2, 01),
+       (07, "Gilbert", "Governs", 2, 01),
        (08, "Billy", "Bills", 3, 02),
-       (09, "Rhonda", "Recruiter", 4, 03),
+       (09, "Rhonda", "Recruits", 4, 03),
        (10, "Sally", "Seller", 5, 04),
-       (11, "Sonny", "Supporter", 6, 05),
-       (12, "Frankie", "Frontend", 7, 06),
-       (13, "Brady", "Backend", 8, 07);
+       (11, "Sonny", "Supports", 6, 05),
+       (12, "Frankie", "Fronts", 7, 06),
+       (13, "Brady", "Backs", 8, 07);
 

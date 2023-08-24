@@ -2,7 +2,7 @@
 ## Description
 ![Employee Tracker](./assets/screenshot.png)
 
-[Video Walkthrough](https://drive.google.com/file/d/1YSK3QQyO2Fcfa1hFWRRcX_UiPFDclTC_/view)
+[Video Walkthrough](https://drive.google.com/file/d/19L_uVx082n1lWC5ah2oJEeX_-bvXmcD4/view)
 
 This is an Employee Tracker designed by Yoon-Jae Kim. The purpose of this app is to allow someone to quickly generate and modify their company's database using Inquirer prompts instead of a MySQL shell/GUI. The purpose of this activity is to solidify SQL concepts as well as provide practice with tying SQL and JS together.
 

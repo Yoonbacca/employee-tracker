@@ -21,29 +21,24 @@ const db = mysql.createConnection(
     console.log(`Connected to the company_db database.`)
   );
 
-// Query database
-
-  
-
-
-  
-// Default response for any other request (Not Found)
-
 const questions = [
-    {
+    {   
         type: 'list',
-        name: 'option',
-        message: 'Select your Option:',
-        choices: ['View All Departments', 
-        'View All Roles', 
-        'View All Employees', 
-        new inquirer.Separator(),
-        'Add A Department', 
-        'Add a Role', 
-        'Add an Employee', 
-        new inquirer.Separator(),
-        'Update an Employee Role',
-        new inquirer.Separator()]
+        name: 'table',
+        message: 'Which table would you like to access?',
+        choices: ['Departments', 'Roles', 'Employees']
+    },
+    {   
+        type: 'list',
+        name: 'action',
+        message: 'What would you like to add to do?',
+        choices: ['View', 'Add', 'Update']
+    },
+    {   
+        type: 'input',
+        name: 'newDept',
+        message: 'What is your new Department name?',
+        when: (answers) => answers.table === 'Departments' && answers.action === 'Add',
     },
 ];
 
@@ -59,28 +54,33 @@ function init() {
     console.log('Welcome to Employee Tracker! Please follow the prompts below');
     inquirer.prompt(questions)
             .then((answers) => {
-                let selection = Object.values(answers).toString();
-                switch (selection) {
-                    case 'View All Departments':
-                        db.query('SELECT * FROM departments', function (err, results) {
+                let table = (answers.table).toLowerCase();
+                let action = answers.action;
+
+                switch (action) {
+                    case 'View':
+                        let sql = `SELECT * FROM ${table}`;
+                        db.query(sql, function (err, results) {
                             console.table(results);
                         });
                         break;
-                    case 'View All Roles':
-                        db.query('SELECT * FROM roles', function (err, results) {
-                            console.table(results);
-                        });
+                    case 'Add':
+                        if (table === "departments") {
+                            let newDept = answers.newDept;
+                            let sql = `INSERT INTO ${table} (name)
+                            VALUES ("${newDept}")`
+                            db.query(sql, function (err, results) {
+                                console.table(results);
+                            });
+                        }
                         break;
-                    case 'View All Employees':
-                        db.query('SELECT * FROM employees', function (err, results) {
-                            console.table(results);
-                         });
-                        break;
+                        
                     default:
                         console.log('Not built yet');
                   }
-                  
+                  console.log(action);
             })
 }
 
 init();
+
